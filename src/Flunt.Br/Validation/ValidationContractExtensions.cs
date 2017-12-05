@@ -91,18 +91,31 @@ namespace Flunt.Br.Validation
             return contract;
         }
 
-        public static Contract IsPhone(this Contract contract, string value, string property, string message)
-        {
-            if(!new Regex(@"^\(\d{2}\)\d{4}-\d{4}$").Match(value).Success)
-                contract.AddNotification(property, message);
-            return contract;
-        }
-
         public static Contract IsCellPhone(this Contract contract, string value, string property, string message)
         {
             if(!new Regex(@"^\(\d{2}\)\d{4,5}-\d{4}$").Match(value).Success)
                 contract.AddNotification(property, message);
             return contract;
+        }
+
+        public static Contract IsPhone(this Contract contract, string value, string property, string message)
+        {
+            return IsPhone(contract, "(99)9999-9999", value, property, message);
+        }
+
+        public static Contract IsPhone(this Contract contract, string format, string value, string property, string message)
+        {
+            if(!CreateRegularExpression(format).Match(value).Success)
+                contract.AddNotification(property, message);
+            return contract;
+        }
+
+        private static Regex CreateRegularExpression(string format)
+        {
+            var regex = new Regex(@"[0-9]+");
+            var phonePattern = Regex.Replace(format, @"[0-9]+", m => $@"\d{{{m.Length}}}");
+            phonePattern = Regex.Replace(phonePattern, @"(?:(?(1)(?!))(\+)|(?(2)(?!))(\()|(?(3)(?!))(\)))+", m => $@"\{m.Value}");
+            return new Regex(phonePattern);
         }
     }
 }

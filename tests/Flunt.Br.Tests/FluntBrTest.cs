@@ -48,11 +48,36 @@ namespace Flunt.Br.Tests
         }
 
         [TestMethod]
-        public void IsPhone_Valid()
+        [DataRow("(45)3222-4520")]
+        [DataRow("(14)3227-6254")]
+        [DataRow("(11)3280-0907")]
+        public void IsPhone_Valid(string phone)
         {
             var right = new Contract()
-                .IsPhone("(45)3222-4520", "phone", "Invalid phone");
+                .IsPhone(phone, "phone", "Invalid phone");
             Assert.AreEqual(true, right.Valid);
+        }
+
+        [TestMethod]
+        [DataRow("+55 (99) 9999-9999","+55 (45) 3222-4520")]
+        [DataRow("+55 99 9999 9999","+55 45 3222 4520")]
+        [DataRow("99 9999 9999","45 3222 4520")]
+        public void IsPhone_Customized_Valid(string format, string phone)
+        {
+            var right = new Contract()
+                .IsPhone(format, phone, "phone", "Invalid phone");
+            Assert.AreEqual(true, right.Valid);
+        }
+
+        [TestMethod]
+        [DataRow("+55 (99) 9999-9999","+55 45) 3222-4520")]
+        [DataRow("+55 99 9999 9999","+55 4 3222 4520")]
+        [DataRow("99 9999 9999","45 322 4520")]
+        public void IsPhone_Customized_InValid(string format, string phone)
+        {
+            var wrong = new Contract()
+                .IsPhone(format, phone, "phone", "Invalid phone");
+            Assert.AreEqual(false, wrong.Valid);
         }
 
         [TestMethod]
